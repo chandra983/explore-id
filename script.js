@@ -145,28 +145,13 @@ destinationCards.forEach(card => {
         const title = card.querySelector('h3').textContent;
         const img = card.querySelector('img').src;
         
-        // Simulate description length for layout demo
-        let description = `Discover the amazing beauty of ${title}. `;
-        let isLong = title.length > 10; // Simple condition for demo
-        
-        if (isLong) {
-            description += "This destination offers a wide array of activities, from cultural tours to outdoor adventures. Immerse yourself in the local traditions, taste the exquisite cuisine, and create memories that will last a lifetime. Our comprehensive packages ensure you don't miss a thing during your stay.";
-        } else {
-            description += "A perfect getaway for relaxation and nature lovers.";
-        }
+        // Short description as requested
+        const description = `Discover the amazing beauty of ${title}. Explore unique local traditions and create unforgettable memories that will last a lifetime.`;
         
         // Populate Popup
         destinationPopup.querySelector('.popup-title').textContent = title;
         destinationPopup.querySelector('.popup-image img').src = img;
         destinationPopup.querySelector('.popup-description').textContent = description;
-        
-        // Set Layout
-        destinationPopup.classList.remove('popup-layout-row', 'popup-layout-col');
-        if (isLong) {
-            destinationPopup.classList.add('popup-layout-col');
-        } else {
-            destinationPopup.classList.add('popup-layout-row');
-        }
         
         // Show Popup
         destinationPopup.classList.add('active');
@@ -261,43 +246,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if(searchBtn) searchBtn.addEventListener('click', filterDestinations);
         }
 
-        // Popup Trigger via View Detail Button
-        const viewDetailBtns = document.querySelectorAll('.btn-view-detail');
-        const destPopup = document.getElementById('destinationPopup');
-        
-        viewDetailBtns.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation(); // Stop bubbling to card click
-                
-                const card = btn.closest('.destination-card');
-                const title = card.querySelector('h3').textContent;
-                const img = card.querySelector('img').src;
-                
-                if (destPopup) {
-                    // Populate
-                    destPopup.querySelector('.popup-title').textContent = title;
-                    destPopup.querySelector('.popup-image img').src = img;
-                    
-                    // Generate description
-                    let description = `Discover the amazing beauty of ${title}. `;
-                    let isLong = title.length > 10;
-                    if (isLong) {
-                        description += "This destination offers a wide array of activities, from cultural tours to outdoor adventures. Immerse yourself in the local traditions, taste the exquisite cuisine, and create memories that will last a lifetime.";
-                    } else {
-                         description += "A perfect getaway for relaxation and nature lovers.";
-                    }
-                    destPopup.querySelector('.popup-description').textContent = description;
-                    
-                    // Layout
-                    destPopup.classList.remove('popup-layout-row', 'popup-layout-col');
-                    if (isLong) destPopup.classList.add('popup-layout-col');
-                    else destPopup.classList.add('popup-layout-row');
-                    
-                    destPopup.classList.add('active');
-                }
-            });
-        });
+        // All detail logic is handled by the cards click listener
     }
 
     // --- Blog Page Logic ---
@@ -364,3 +313,77 @@ window.addEventListener('load', () => {
 });
 
 console.log('Globe Trekker website loaded successfully!');
+
+// --- Blog Detail: TOC & Share Logic ---
+
+document.addEventListener('DOMContentLoaded', () => {
+    const tocList = document.querySelector('.toc-list');
+    const tocHeader = document.querySelector('.toc-header');
+    const blogContent = document.querySelector('.blog-content');
+
+    if (tocList && blogContent) {
+        const headings = blogContent.querySelectorAll('h2, h3');
+        
+        headings.forEach((heading, index) => {
+            // Create unique ID for each heading
+            const id = `heading-${index}`;
+            heading.id = id;
+
+            // Create TOC link
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.href = `#${id}`;
+            a.textContent = heading.textContent;
+            
+            if (heading.tagName === 'H3') {
+                a.classList.add('toc-h3');
+            }
+            
+            li.appendChild(a);
+            tocList.appendChild(li);
+        });
+
+        // Toggle TOC
+        if (tocHeader) {
+            tocHeader.addEventListener('click', () => {
+                tocList.classList.toggle('hidden');
+                const icon = tocHeader.querySelector('i');
+                if (icon) {
+                    icon.classList.toggle('bi-chevron-down');
+                    icon.classList.toggle('bi-chevron-up');
+                }
+            });
+        }
+    }
+
+    // Social Share Logic
+    const shareBtns = document.querySelectorAll('.share-btn');
+    shareBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const platform = btn.getAttribute('data-platform');
+            const url = encodeURIComponent(window.location.href);
+            const title = encodeURIComponent(document.title);
+            let shareUrl = '';
+
+            switch (platform) {
+                case 'facebook':
+                    shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
+                    break;
+                case 'twitter':
+                    shareUrl = `https://twitter.com/intent/tweet?url=${url}&text=${title}`;
+                    break;
+                case 'whatsapp':
+                    shareUrl = `https://api.whatsapp.com/send?text=${title}%20${url}`;
+                    break;
+                case 'linkedin':
+                    shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${url}`;
+                    break;
+            }
+
+            if (shareUrl) {
+                window.open(shareUrl, '_blank', 'width=600,height=400');
+            }
+        });
+    });
+});
